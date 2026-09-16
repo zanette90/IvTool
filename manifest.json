@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "IV Tool",
+  "version": "1.0",
+  "permissions": ["alarms", "tabs", "storage"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://poke.idleworld.online/*"],
+      "js": ["inject.js"],
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["https://poke.idleworld.online/*"],
+      "js": ["content.js"],
+      "css": ["panel.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["panel.html", "panel.css", "inject.js"],
+      "matches": ["https://poke.idleworld.online/*"]
+    }
+  ]
+}

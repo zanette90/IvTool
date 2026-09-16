@@ -1,0 +1,406 @@
+<template class="iv-tool-panel-tpl">
+  <div class="iv-tool-panel">
+    <div class="iv-tool-header" data-drag>
+      <span class="iv-tool-name"></span>
+      <span class="iv-tool-close" data-close>✕</span>
+    </div>
+
+    <div class="iv-tool-hero">
+      <img class="iv-tool-img" alt="pokemon imagem" hidden />
+
+      <div class="iv-tool-id">
+        <div class="iv-tool-lvl">
+          <b class="iv-tool-level"></b> ·
+          <b class="iv-tool-power"></b>
+        </div>
+        <div class="iv-tool-types"></div>
+      </div>
+    </div>
+    <p class="iv-tool-dica">O cálculo de iv no lvl 20 tem precisão máxima.</p>
+    <div class="iv-tool-tabs">
+      <button class="iv-tool-tab is-active" data-tab="iv">IV Calc</button>
+      <button class="iv-tool-tab" data-tab="moves">Moves</button>
+      <button class="iv-tool-tab" data-tab="farm">Rotas</button>
+    </div>
+
+    <div class="iv-tool-pane" data-pane="iv">
+      <div class="iv-tool-meta"><b></b></div>
+
+      <table class="iv-tool-table"></table>
+
+      <div class="iv-tool-footer">
+        <div class="iv-tool-total-row">
+          <span>IV Total</span>
+          <span><b class="iv-tool-total"></b>/192</span>
+        </div>
+        <div class="iv-tool-bar">
+          <div class="iv-tool-total-fill"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MUDANÇA: painel da aba Moves -->
+    <div class="iv-tool-pane" data-pane="moves" hidden>
+      <div class="iv-tool-moves"></div>
+    </div>
+
+    <!-- MUDANÇA: painel da aba Rotas de farm -->
+    <div class="iv-tool-pane" data-pane="farm" hidden>
+      <div class="iv-tool-farm"></div>
+    </div>
+
+    <div class="iv-tool-error" hidden></div>
+  </div>
+</template>
+
+<template class="iv-tool-row">
+  <tr>
+    <td class="iv-tool-stat"></td>
+    <td class="iv-tool-bar-cell">
+      <div class="iv-tool-bar">
+        <div class="iv-tool-fill"></div>
+      </div>
+    </td>
+    <td class="iv-tool-val"></td>
+  </tr>
+</template>
+
+<template class="iv-tool-legend-tpl">
+  <div class="iv-tool-legend">
+    <div class="iv-tool-legend-header" data-drag>
+      <span>Legenda</span>
+      <span class="iv-tool-legend-close" data-close>×</span>
+    </div>
+    <div class="iv-tool-legend-body"></div>
+  </div>
+</template>
+
+<template class="iv-tool-legend-uncaught">
+  <div class="iv-tool-legend-item">
+    <span class="iv-tool-legend-swatch"></span>
+    <span>Não capturados</span>
+    <span class="iv-tool-legend-count"></span>
+  </div>
+</template>
+
+<template class="iv-tool-legend-farm">
+  <div class="iv-tool-legend-group">
+    <div class="iv-tool-legend-item">
+      <span class="iv-tool-legend-swatch" style="background: #0b4c96"></span>
+      <span>Super Efetivo ×2</span>
+    </div>
+    <div class="iv-tool-legend-item">
+      <span class="iv-tool-legend-swatch" style="background: #ff9500"></span>
+      <span>Super Efetivo ×4</span>
+    </div>
+  </div>
+</template>
+
+<template class="iv-tool-legend-hint">
+  <div class="iv-tool-legend-item">
+    <kbd class="iv-tool-kbd">Alt</kbd> +
+    <kbd class="iv-tool-kbd">K</kbd>
+    <span>Aperte Alt + K </span>
+    <span>para exibir a legenda</span>
+  </div>
+</template>
+
+<template class="iv-tool-legend-caught">
+  <div class="iv-tool-legend-item">
+    <span>✅ Tudo capturado.</span>
+  </div>
+</template>
+
+<template class="ivtool_menu">
+  <div class="card_menu">
+    <div class="header" data-drag>
+      <span class="hero-badge">IV</span> Tool
+      <span class="version">v1.0</span>
+      <span class="status"><span class="dot"></span> conta conectada</span>
+      <span class="menu-close" data-close>✕</span>
+    </div>
+
+    <div class="content">
+      <div class="section-label">
+        <i class="section-icon">
+          <svg width="18" height="18" viewBox="0 0 16 16" fill="#e5e7eb">
+            <path
+              d="M1 0 0 1l2.2 3.081a1 1 0 0 0 .815.419h.07a1 1 0 0 1 .708.293l2.675 2.675-2.617 2.654A3.003 3.003 0 0 0 0 13a3 3 0 1 0 5.878-.851l2.654-2.617.968.968-.305.914a1 1 0 0 0 .242 1.023l3.27 3.27a.997.997 0 0 0 1.414 0l1.586-1.586a.997.997 0 0 0 0-1.414l-3.27-3.27a1 1 0 0 0-1.023-.242L10.5 9.5l-.96-.96 2.68-2.643A3.005 3.005 0 0 0 16 3q0-.405-.102-.777l-2.14 2.141L12 4l-.364-1.757L13.777.102a3 3 0 0 0-3.675 3.68L7.462 6.46 4.793 3.793a1 1 0 0 1-.293-.707v-.071a1 1 0 0 0-.419-.814z"
+            />
+          </svg>
+        </i>
+        <span class="titulo">Ações Rápidas</span>
+      </div>
+
+      <div class="content__container is-action" data-accent="cyan">
+        <i class="icone">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <rect
+              x="2.5"
+              y="1.5"
+              width="13"
+              height="15"
+              rx="2"
+              stroke="currentColor"
+              stroke-width="1.4"
+            />
+            <path
+              d="M5 5h8M5 8.5h3M5 12h3M11 8v4M13 10h-4"
+              stroke="currentColor"
+              stroke-width="1.3"
+              stroke-linecap="round"
+            />
+          </svg>
+        </i>
+        <div class="texto">
+          <p class="titulo">Calculadora de IV</p>
+          <p class="descricao">
+            Calcula o iv diretamente no chat com atalho alt k ou click.
+          </p>
+        </div>
+        <span class="kbd"><kbd>Alt</kbd><kbd>K</kbd></span>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="section-label">
+        <i class="section-icon">
+          <svg width="18" height="18" viewBox="0 0 16 16" fill="#e5e7eb">
+            <path
+              d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492M5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0"
+            />
+            <path
+              d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115z"
+            />
+          </svg>
+        </i>
+        <span class="titulo">Configurações</span>
+      </div>
+
+      <div class="content__container" data-accent="blue">
+        <i class="icone">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path
+              d="M8 1.5c2.5 0 4.5 2 4.5 4.5C12.5 9.5 8 14.5 8 14.5S3.5 9.5 3.5 6C3.5 3.5 5.5 1.5 8 1.5Z"
+              stroke="currentColor"
+              stroke-width="1.3"
+              stroke-linejoin="round"
+            />
+            <circle
+              cx="8"
+              cy="6"
+              r="1.6"
+              stroke="currentColor"
+              stroke-width="1.3"
+            />
+          </svg>
+        </i>
+        <div class="texto">
+          <p class="titulo">Marcadores no mapas</p>
+          <p class="descricao">Destaca pokemons não capturados.</p>
+        </div>
+        <button
+          class="switch"
+          role="switch"
+          data-cfg="marcadores"
+          aria-checked="true"
+          aria-label="Marcadores no mapa"
+        ></button>
+      </div>
+
+      <div class="content__container" data-accent="orange">
+        <i class="icone">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path
+              d="M2.6 7.5h10.8V13a1 1 0 0 1-1 1H3.6a1 1 0 0 1-1-1V7.5Z"
+              stroke="currentColor"
+              stroke-width="1.3"
+              stroke-linejoin="round"
+            />
+            <rect
+              x="2"
+              y="5"
+              width="12"
+              height="2.6"
+              rx=".6"
+              stroke="currentColor"
+              stroke-width="1.3"
+            />
+            <path d="M8 5v9" stroke="currentColor" stroke-width="1.3" />
+            <path
+              d="M8 5C6.9 5 5.4 4.7 5.4 3.5S6.9 2.4 8 5Z"
+              stroke="currentColor"
+              stroke-width="1.2"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M8 5c1.1 0 2.6-.3 2.6-1.5S9.1 2.4 8 5Z"
+              stroke="currentColor"
+              stroke-width="1.2"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </i>
+        <div class="texto">
+          <p class="titulo">Lembrete de gift</p>
+          <p class="descricao">Exibe lembretes do daily gift.</p>
+        </div>
+        <button
+          class="switch"
+          role="switch"
+          data-cfg="daily"
+          aria-checked="true"
+          aria-label="Lembrete de daily"
+        ></button>
+      </div>
+
+      <div class="content__container" data-accent="purple">
+        <i class="icone">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path
+              d="M3 6.4 11 3v10L3 9.6H2a1 1 0 0 1-1-1V7.4a1 1 0 0 1 1-1Z"
+              stroke="currentColor"
+              stroke-width="1.3"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M4.2 9.6v2.6a1 1 0 0 0 1 1h.8a1 1 0 0 0 1-1v-1.7"
+              stroke="currentColor"
+              stroke-width="1.3"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M13 6c.9.4 1.4 1.1 1.4 2S13.9 9.6 13 10"
+              stroke="currentColor"
+              stroke-width="1.3"
+              stroke-linecap="round"
+            />
+          </svg>
+        </i>
+
+        <div class="texto">
+          <p class="titulo">Bloquear Anúncios</p>
+          <p class="descricao">Oculta anúncios globais de shinny.</p>
+        </div>
+
+        <button
+          class="switch"
+          role="switch"
+          data-cfg="anuncios"
+          aria-checked="true"
+          aria-label="Bloquear Anúncios Global"
+        ></button>
+      </div>
+
+      <div class="content__container" data-accent="#e9e2d0">
+        <i class="icone">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path
+              d="M4.5 2h7l3 4-6.5 8L1.5 6l3-4Z"
+              stroke="currentColor"
+              stroke-width="1.3"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M1.5 6h13M6 2 4.5 6 8 14M10 2l1.5 4L8 14"
+              stroke="currentColor"
+              stroke-width="1.1"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </i>
+
+        <div class="texto">
+          <p class="titulo">Bloquear Promoções</p>
+          <p class="descricao">
+            Oculta anúncios de promoção da loja de diamantes.
+          </p>
+        </div>
+
+        <button
+          class="switch"
+          role="switch"
+          data-cfg="promocao"
+          aria-checked="true"
+          aria-label="Bloquear Promoções"
+        ></button>
+      </div>
+
+      <div class="content__container is-action" data-accent="green">
+        <i class="icone">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <circle
+              cx="4"
+              cy="4"
+              r="2.2"
+              stroke="currentColor"
+              stroke-width="1.4"
+            />
+            <circle
+              cx="14"
+              cy="14"
+              r="2.2"
+              stroke="currentColor"
+              stroke-width="1.4"
+            />
+            <path
+              d="M4 6.5c0 4.5 10 1 10 5.3"
+              stroke="currentColor"
+              stroke-width="1.4"
+              stroke-linecap="round"
+              stroke-dasharray="1 2.4"
+            />
+          </svg>
+        </i>
+        <div class="texto">
+          <p class="titulo">Rotas de farm</p>
+          <p class="descricao">Melhores hunts por XP e loot.</p>
+        </div>
+        <button
+          class="switch"
+          role="switch"
+          data-cfg="rotafarm"
+          aria-checked="true"
+          aria-label="Rotas de farm"
+        ></button>
+      </div>
+
+      <div class="content__container" data-accent="yellow">
+        <i class="icone">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path
+              d="M1.5 8H4.5L6 4l2 8 1.5-4H14.5"
+              stroke="currentColor"
+              stroke-width="1.3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </i>
+        <div class="texto">
+          <p class="titulo">Anti-desconexão</p>
+          <p class="descricao">Retorna a hunt se o jogo travar.</p>
+        </div>
+        <button
+          class="switch"
+          role="switch"
+          data-cfg="antidesconexao"
+          aria-checked="true"
+          aria-label="Anti-desconexão"
+        ></button>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>Developed by</p>
+      <a
+        class="footer-link"
+        href="https://github.com/zanette90"
+        target="_blank"
+        rel="noopener"
+        >zanette90</a
+      >
+      - All Rights Reserved &reg;
+    </div>
+  </div>
+</template>
