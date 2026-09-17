@@ -39,12 +39,10 @@
       </div>
     </div>
 
-    <!-- MUDANÇA: painel da aba Moves -->
     <div class="iv-tool-pane" data-pane="moves" hidden>
       <div class="iv-tool-moves"></div>
     </div>
 
-    <!-- MUDANÇA: painel da aba Rotas de farm -->
     <div class="iv-tool-pane" data-pane="farm" hidden>
       <div class="iv-tool-farm"></div>
     </div>
@@ -387,6 +385,50 @@
           data-cfg="antidesconexao"
           aria-checked="true"
           aria-label="Anti-desconexão"
+        ></button>
+      </div>
+
+      <div class="content__container is-action" data-accent="green">
+        <i class="icone">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path
+              d="M1.5 2h1.7l1 8.5a1 1 0 0 0 1 .9h6.4a1 1 0 0 0 1-.8L14 5H4"
+              stroke="currentColor"
+              stroke-width="1.3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <circle cx="6" cy="14" r="1" fill="currentColor" />
+            <circle cx="12" cy="14" r="1" fill="currentColor" />
+          </svg>
+        </i>
+        <div class="texto">
+          <p class="titulo">Auto-compra Eevee</p>
+          <p class="descricao">Compra no trader e guarda no box.</p>
+          <input
+            type="text"
+            class="iv-tool-gastar-input"
+            inputmode="numeric"
+            placeholder="Valor máximo a gastar"
+            style="
+              margin-top: 6px;
+              width: 100%;
+              box-sizing: border-box;
+              padding: 6px 8px;
+              border-radius: 6px;
+              border: 1px solid #3a3a4a;
+              background: #1a1a24;
+              color: #e5e7eb;
+              font-size: 12px;
+            "
+          />
+        </div>
+        <button
+          class="switch"
+          role="switch"
+          data-cfg="autocompra"
+          aria-checked="false"
+          aria-label="Auto-compra Eevee"
         ></button>
       </div>
     </div>

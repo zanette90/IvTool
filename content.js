@@ -20,15 +20,20 @@ if (ultimoReload) {
   console.log(">>> ÚLTIMO RELOAD FOI:", JSON.parse(ultimoReload));
 }
 
-const config = JSON.parse(localStorage.getItem("iv-tool-config")) || {
-  marcadores: true,
-  tooltip: true,
-  daily: true,
-  anuncios: true,
-  antidesconexao: true,
-  rotafarm: true,
-  promocao: true,
-};
+const config = Object.assign(
+  {
+    marcadores: true,
+    tooltip: true,
+    daily: true,
+    anuncios: true,
+    antidesconexao: true,
+    rotafarm: true,
+    promocao: true,
+    autocompra: false,
+    gastar: 10000000,
+  },
+  JSON.parse(localStorage.getItem("iv-tool-config")) || {},
+);
 
 let currentToken = null;
 let wsMorto = false;
@@ -45,6 +50,9 @@ let botaoMenu = null;
 let painelMenu = null;
 
 let backHuntTimer = null;
+
+let autoBuyTimer = null;
+let autoBuyRodando = false;
 
 let before;
 let after;
@@ -966,6 +974,19 @@ async function criarBotaoMenu() {
         aplicarConfig(chave);
       });
     });
+
+    const gastarInput = painelMenu.querySelector(".iv-tool-gastar-input");
+    if (gastarInput) {
+      gastarInput.value = config.gastar;
+      gastarInput.addEventListener("change", () => {
+        const v = +gastarInput.value.replace(/\D/g, "");
+        gastar = v;
+        config.gastar = v;
+        gastarInput.value = v;
+        localStorage.setItem("iv-tool-config", JSON.stringify(config));
+      });
+    }
+
     const header = painelMenu.querySelector(".header");
     if (header) makeDraggable(painelMenu, header);
   });
@@ -1020,6 +1041,18 @@ function aplicarConfig(chave) {
     } else {
       clearInterval(promoTimer);
       promoTimer = null;
+    }
+  }
+
+  if (chave === "autocompra") {
+    if (config.autocompra) {
+      if (!autoBuyTimer) {
+        autoBuyLoop();
+        autoBuyTimer = setInterval(autoBuyLoop, 30000);
+      }
+    } else {
+      clearInterval(autoBuyTimer);
+      autoBuyTimer = null;
     }
   }
 }
@@ -1315,77 +1348,119 @@ async function checkConnect() {
   }
 }
 
-let gastar = 500000000;
+let gastar = config.gastar;
+
+async function autoBuyLoop() {
+  if (autoBuyRodando) return;
+  autoBuyRodando = true;
+  try {
+    await autoBuyEevee();
+  } catch (e) {
+    console.warn("autoBuyEevee erro:", e);
+  } finally {
+    autoBuyRodando = false;
+  }
+}
 
 async function autoBuyEevee() {
   console.log("Ainda posso gastar: " + gastar);
-  const fechar = document.querySelector(".cfg-x");
 
-  document.querySelector(".npc-plate-btn")?.click();
-  await sleep(600);
+  const celuran = document.querySelector("[data-guide='dock-home']");
+  if (!celuran) return;
 
-  document.querySelector(".npc-dlg-btn")?.click();
-  await sleep(600);
+  await sleep(1000);
+  celuran.click();
 
-  const dinheiro = document
-    .querySelector(".nsh-gold")
-    ?.textContent.split(" ")[1]
-    ?.replaceAll(".", "");
+  const market = document.querySelector(".market-cta");
+  market?.click();
+  await sleep(1000);
 
-  console.log("dinheiro:", dinheiro);
+  const loja = document.querySelectorAll(".field-plate")[6];
+  await sleep(1000);
+  if (!loja) return;
+  loja.querySelector("button")?.click();
 
-  const eevee = document.querySelectorAll(".mln-card")[1];
-  if (!eevee) return;
+  await sleep(1000);
 
-  const price = Number(
-    eevee
-      .querySelector(".mln-price")
-      ?.textContent.split(" ")[1]
-      .replaceAll(".", ""),
-  );
-  console.log("price:", price);
+  const talk = document.querySelector(".npc-dlg-btn");
+  talk?.click();
 
-  if (gastar - price >= 0) {
-    eevee.querySelector(".mk-buy")?.click();
-    gastar -= price;
-  }
+  await sleep(1000);
 
-  if (document.querySelector(".mln-warn")) {
-    console.log("time cheio");
-    fechar?.click();
+  const lojaItem = document.querySelectorAll(".trd-card")[1];
+  console.log("lojaItem:", lojaItem);
+  if (!lojaItem) return console.warn("trd-card[1] não existe");
+
+  const price = +lojaItem
+    .querySelector(".trd-price")
+    .textContent.replace(/\D/g, "");
+  console.log("price:", price, "gastar:", gastar);
+
+  let avisoTimeCheio = document.querySelector(".trd-warn");
+
+  if (gastar - price >= 65000 && !avisoTimeCheio) {
+    while (!avisoTimeCheio) {
+      avisoTimeCheio = document.querySelector(".trd-warn");
+      if (avisoTimeCheio) {
+        console.log("break: time cheio");
+        break;
+      }
+      lojaItem.querySelector("button")?.click();
+      gastar -= price;
+      await sleep(600);
+    }
+    document.querySelector(".nsh-x")?.click();
+    await sleep(600);
+    depot();
+  } else {
+    await sleep(600);
+    depot();
   }
 }
 
 async function depot() {
   await sleep(2000);
+  const celuran = document.querySelector("[data-guide='dock-home']");
+  celuran?.click();
+  await sleep(2000);
+  const team = document.querySelectorAll(".phud-mon");
 
+  console.log(team);
+
+  if (team.length === 1) {
+    return;
+  }
+  await sleep(2000);
   [...document.querySelectorAll(".npc-plate-btn")]
     .find((a) => a.textContent === "Open Depot")
     ?.click();
 
   await sleep(2000);
+
   document.querySelector(".npc-dlg-btn")?.click();
-  await sleep(2000);
-
-  [...document.querySelectorAll(".dep-tab")]
-    .find((a) => a.textContent === "⚔ Pokémon")
-    ?.click();
 
   await sleep(2000);
+
+  const abaPoke = [...document.querySelectorAll(".nsh-tab")].find(
+    (a) => a.textContent === "⚔ Pokémon",
+  );
+
+  await sleep(2000);
+  abaPoke?.click();
+
+  await sleep(2000);
+
   const v = document.querySelectorAll("[title='Store in the Box']");
-  console.log(v);
 
-  for (i = 0; i <= v.length; i++) {
+  for (let i = 0; i < v.length; i++) {
     if (i >= 1) {
-      await sleep(600);
       v[i]?.click();
+      await sleep(600);
     }
   }
-
-  document.querySelector(".cfg-x")?.click();
+  document.querySelector(".nsh-x")?.click();
 }
 
-setInterval(depot, 20000);
-//setInterval(autoBuyEevee, 10000);
+if (config.autocompra) aplicarConfig("autocompra");
 
 setInterval(checkConnect, 60000);
