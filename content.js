@@ -236,6 +236,8 @@ criarBotaoMenu();
 if (config.antidesconexao) backHuntTimer = setInterval(backHunt, 10000);
 if (config.promocao) aplicarConfig("promocao");
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 function calcIV(statFinal, base, level, quality, i) {
   const exp = i === 0 || i === 5 ? Exp_hp_vel : Exp;
   const fator = (level / 100) * Math.pow(quality, exp);
@@ -1312,5 +1314,78 @@ async function checkConnect() {
     location.reload();
   }
 }
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+let gastar = 500000000;
+
+async function autoBuyEevee() {
+  console.log("Ainda posso gastar: " + gastar);
+  const fechar = document.querySelector(".cfg-x");
+
+  document.querySelector(".npc-plate-btn")?.click();
+  await sleep(600);
+
+  document.querySelector(".npc-dlg-btn")?.click();
+  await sleep(600);
+
+  const dinheiro = document
+    .querySelector(".nsh-gold")
+    ?.textContent.split(" ")[1]
+    ?.replaceAll(".", "");
+
+  console.log("dinheiro:", dinheiro);
+
+  const eevee = document.querySelectorAll(".mln-card")[1];
+  if (!eevee) return;
+
+  const price = Number(
+    eevee
+      .querySelector(".mln-price")
+      ?.textContent.split(" ")[1]
+      .replaceAll(".", ""),
+  );
+  console.log("price:", price);
+
+  if (gastar - price >= 0) {
+    eevee.querySelector(".mk-buy")?.click();
+    gastar -= price;
+  }
+
+  if (document.querySelector(".mln-warn")) {
+    console.log("time cheio");
+    fechar?.click();
+  }
+}
+
+async function depot() {
+  await sleep(2000);
+
+  [...document.querySelectorAll(".npc-plate-btn")]
+    .find((a) => a.textContent === "Open Depot")
+    ?.click();
+
+  await sleep(2000);
+  document.querySelector(".npc-dlg-btn")?.click();
+  await sleep(2000);
+
+  [...document.querySelectorAll(".dep-tab")]
+    .find((a) => a.textContent === "⚔ Pokémon")
+    ?.click();
+
+  await sleep(2000);
+  const v = document.querySelectorAll("[title='Store in the Box']");
+  console.log(v);
+
+  for (i = 0; i <= v.length; i++) {
+    if (i >= 1) {
+      await sleep(600);
+      v[i]?.click();
+    }
+  }
+
+  document.querySelector(".cfg-x")?.click();
+}
+
+setInterval(depot, 20000);
+//setInterval(autoBuyEevee, 10000);
+
 setInterval(checkConnect, 60000);
