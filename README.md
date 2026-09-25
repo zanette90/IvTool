@@ -1,6 +1,6 @@
 # PokeIdle IV Tool
 
-Extensão para o jogo **Poke Idle World** (`poke.idleworld.online`) com ferramentas de IV, marcação de mapa, rota de farm, anti-desconexão e keep alive para abas do chrome.
+Extensão Mod para o jogo **Poke Idle World** (`poke.idleworld.online`) com ferramentas de IV, marcação de mapa, rota de farm, anti-desconexão e keep alive para abas do chrome.
 
 ---
 
